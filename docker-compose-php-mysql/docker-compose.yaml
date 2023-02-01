@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  projeto:
+    build:
+      context: projeto
+    command: php -S 0.0.0.0:8000 -t /projeto
+    ports:
+      - 8000:8000
+    secrets:
+      - db-password
+    volumes:
+      - ./projeto:/projeto
+      # - projeto-vendor:/app/vendor
+    networks:
+      - public
+      - private
+    depends_on:
+      - db
+  db:
+    image: mariadb:10.6.4-focal
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - 3306:3306
+    secrets:
+      - db-password
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - public
+    environment:
+      - MYSQL_DATABASE=projeto
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db-password
+
+networks:
+  public:
+  private:
+volumes:
+  # projeto-vendor:
+  db-data:
+secrets:
+  db-password:
+    file: db/password.txt
